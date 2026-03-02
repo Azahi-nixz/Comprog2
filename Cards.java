@@ -4,7 +4,6 @@ class Card {
     Card(String suit, String rank) {
         this.suit = suit;
         this.rank = rank;
-        this.value = 0;
 
         switch (rank) {
             case "A" -> this.value = 14;

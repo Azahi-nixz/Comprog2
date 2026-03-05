@@ -1,3 +1,4 @@
+import java.sql.SQLOutput;
 import java.util.*;
 
 public class Game {
@@ -15,6 +16,43 @@ public class Game {
     static ArrayList<Card> enemyHandCards = new ArrayList<>();
 
 
+    public static void result(String roundType, int moneyAdded, int progressionPoints) {
+        if (Characters.points < Enemies.points) {
+            if (roundType.equals("crucial")) {
+                System.out.println("You lose!");
+                String bye = """
+                        Too bad. This result means that you are not qualified here.
+                        (Please restart the game.)
+                        """;
+                typeWriter(bye);
+            }
+            else if (roundType.equals("bonus")) {
+                plotProgression += progressionPoints;
+            }
+        }
+
+        else if (Characters.points > Enemies.points) {
+            plotProgression += progressionPoints;
+            System.out.println("You win!");
+
+        }
+
+        else  {
+            plotProgression += progressionPoints;
+            System.out.println("Tie!");
+
+
+        }
+    }
+
+    public static void CardCleaner() {
+        handCards.clear();
+        enemyHandCards.clear();
+        Enemies.points = 0;
+        Characters.points = 0;
+        cards.clear();
+        Deck();
+    }
 
     public static void Deck() {
         cards.clear();
@@ -36,6 +74,7 @@ public class Game {
         }
     }
 
+
     public static void luckyNine() {
         Deck();
         Collections.shuffle(cards);
@@ -50,10 +89,7 @@ public class Game {
             enemyHandCards.add(cards.removeFirst());
         }
 
-        int points = 0;
-        int enemyPoints = 0;
-
-        while (points < 3 && enemyPoints < 3) {
+        while (Characters.points < 3) {
             int value = 0;
             int enemyValue = 0;
 
@@ -73,8 +109,8 @@ public class Game {
                         """
                                 Please choose a move:
                                 Points: You: %d | Director: %d
-                                %n""", points,
-                        enemyPoints
+                                %n""", Characters.points,
+                        Enemies.points
 
                 );
 
@@ -123,7 +159,7 @@ public class Game {
 
                     if (value > enemyValue) {
                         System.out.println("You win. Enemy card value: " + enemyValue);
-                        points++;
+                        Characters.points++;
                         handCards.clear();
                         enemyHandCards.clear();
 
@@ -152,7 +188,7 @@ public class Game {
 
                     else {
                         System.out.println("You lose! Enemy card value: " + enemyValue);
-                        enemyPoints++;
+                        Enemies.points++;
                         handCards.clear();
                         enemyHandCards.clear();
 
@@ -170,20 +206,9 @@ public class Game {
             } catch (InputMismatchException e) {
                 System.err.println("Invalid input");
                 scan.nextLine();
+
             }
 
-        }
-
-        if (points > enemyPoints) {
-            System.out.println("You win");
-        }
-
-        else if (points == enemyPoints) {
-            System.out.println("Tie");
-        }
-
-        else {
-            System.out.println("You lose");
         }
 
     }
@@ -201,11 +226,8 @@ public class Game {
             enemyHandCards.add(cards.removeFirst());
         }
 
-        int points = 0;
-        int enemyPoints = 0;
 
-
-        while (!handCards.isEmpty() && !enemyHandCards.isEmpty() && points < 3 && enemyPoints < 3) {
+        while (!handCards.isEmpty() && !enemyHandCards.isEmpty() && Characters.points < 3 && Enemies.points < 3) {
 
             Collections.shuffle(enemyHandCards);
 
@@ -214,8 +236,8 @@ public class Game {
                         """
                                 Which one will you choose? Select the number.
                                 Points: You: %d | Director: %d
-                                %n""", points,
-                        enemyPoints
+                                %n""", Characters.points,
+                        Enemies.points
 
                 );
 
@@ -235,35 +257,31 @@ public class Game {
 
                if (rules.equalsIgnoreCase("normal")) {
                     if (card.value < enemyCard.value) {
-                   enemyPoints += 1;
+                   Enemies.points += 1;
                    System.out.println("You lose. Director played: " + enemyCard);
                     }
                     else if (card.value > enemyCard.value) {
-                   points += 1;
+                   Characters.points += 1;
                    System.out.println("You win. Director played: " + enemyCard);
                         }
                         else {
-                   points += 0;
                    System.out.println("Tie!");
                             }
                }
 
                else if (rules.equalsIgnoreCase("modified")) {
-
                    if (card.value > enemyCard.value) {
-                       enemyPoints += 1;
-                       System.out.println("You lose (MODIFIED). Director played: " + enemyCard);
+                       Enemies.points += 1;
+                       System.out.println("You lose(HIGHER). Director played: " + enemyCard);
                    }
                    else if (card.value < enemyCard.value) {
-                       points += 1;
-                       System.out.println("You win (MODIFIED). Director played: " + enemyCard);
+                       Characters.points += 1;
+                       System.out.println("You win(LOWER). Director played: " + enemyCard);
                    }
                    else {
-                       points += 0;
                        System.out.println("Tie!");
                    }
                }
-
 
             } catch (InputMismatchException e) {
                 System.err.println("Invalid input");
@@ -271,29 +289,11 @@ public class Game {
             }
         }
 
-        if (points < enemyPoints) {
-            System.out.println("You lose!");
-            String bye = """
-                    Too bad. This result means that you are not qualified here.
-                    (Please restart the game.)
-                    """;
-            typeWriter(bye);
+        if (rules.equalsIgnoreCase("normal")) {
+            result("crucial" , 0, 10);
         }
 
-        else if (points > enemyPoints) {
-            plotProgression += 10;
-            System.out.println("You win!");
-            partOne();
-
-
-        }
-
-        else  {
-            plotProgression += 10;
-            System.out.println("Tie!");
-
-
-        }
+        else {result("bonus" , 0, 10);}
     }
 
     public static void Prologue() {
@@ -372,15 +372,73 @@ public class Game {
 
     public static void partOne() {
         String Narration = """
-                Very well. You passed the test.
+                Director: "Very well. You passed the test."
+                
+                Director: "I know you have a lot of question now, but take note that this academy is not normal as you think."
+                
+                Director: "Everything here can be bought by money, even your grades. And in order to raise your money, you have
+                to be a genius, in gambling."
+                
+                The director handed you a hefty amount of starter cash.
                 """;
+
+        typeWriter(Narration);
+        Characters.money += 2000;
+
+        String Narration2 = """
+                That's your starter cash. How about another round of card war game? You can double the amount of
+                your starter cash if you win.
+                
+                This time, we will compete on whose card is lower.
+                
+                ACCEPT THE CHALLENGE?
+                
+                1. Yes (no risk)
+                2. No
+                """;
+
+       CardCleaner();
+
+        typeWriter(Narration2);
+
+        while (Characters.points < 3 && Enemies.points < 3) {
+            int reply = scan.nextInt();
+            try {
+                switch (reply) {
+                    case 1:
+                        Enemies Director = new Enemies("Director", 2000, 0);
+                        System.out.println(Director.stats());
+                        cardWar("modified");
+                        result("bonus", 2000, 10);
+                        break;
+                    case 2:
+                        plotProgression += 10;
+                        break;
+                    default:
+                        System.err.println("Invalid reply");
+
+                }
+            } catch (InputMismatchException e) {
+                System.err.println("Invalid reply");
+            }
+
+        }
+
     }
 
-    public static void main(String[] args) {
-      luckyNine();
+    public static void partTwo() {
+        System.out.println("To be continued");
+    }
+
+  public static void main(String[] args) {
+      Prologue();
 
         if (plotProgression >= 10) {
             partOne();
+        }
+
+        if  (plotProgression >= 20) {
+            partTwo();
         }
     }
 }

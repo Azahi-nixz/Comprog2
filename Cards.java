@@ -17,5 +17,6 @@ class Card {
     @Override
     public String toString() {
         return rank + suit;
+
     }
 }
